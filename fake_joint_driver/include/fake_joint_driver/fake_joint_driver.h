@@ -10,6 +10,7 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
+#include <random>
 
 class FakeJointDriver : public hardware_interface::RobotHW
 {
@@ -27,6 +28,8 @@ private:
   bool use_description_;
   std::vector<std::string> include_joints_;
   std::vector<std::string> exclude_joints_;
+  std::default_random_engine generator_;
+  std::normal_distribution<double> dist_;
 
 public:
   FakeJointDriver(void);

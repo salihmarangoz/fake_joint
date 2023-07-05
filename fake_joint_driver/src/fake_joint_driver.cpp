@@ -13,7 +13,7 @@
 #include <hardware_interface/joint_command_interface.h>
 #include "fake_joint_driver/fake_joint_driver.h"
 
-FakeJointDriver::FakeJointDriver(void)
+FakeJointDriver::FakeJointDriver(void) : dist_(0.0, 1e-4)
 {
   ros::NodeHandle pnh("~");
   std::set<std::string> joint_set;
@@ -122,6 +122,11 @@ FakeJointDriver::~FakeJointDriver()
 void FakeJointDriver::update(void)
 {
   // only do loopback
-  act_dis = cmd_dis;
+  //act_dis = cmd_dis;
+
+  for (int i=0; i<cmd_dis.size(); i++)
+  {
+    act_dis[i] = cmd_dis[i] + dist_(generator_);
+  }
 }
 
