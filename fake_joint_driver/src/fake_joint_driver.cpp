@@ -13,7 +13,7 @@
 #include <hardware_interface/joint_command_interface.h>
 #include "fake_joint_driver/fake_joint_driver.h"
 
-FakeJointDriver::FakeJointDriver(void) : dist_(0.0, 1e-4)
+FakeJointDriver::FakeJointDriver(void)
 {
   ros::NodeHandle pnh("~");
   std::set<std::string> joint_set;
@@ -24,6 +24,10 @@ FakeJointDriver::FakeJointDriver(void) : dist_(0.0, 1e-4)
   pnh.getParam("include_joints", include_joints_);
   pnh.getParam("exclude_joints", exclude_joints_);
   pnh.getParam("start_position", start_position_map);
+  pnh.param<double>("noise_std_dev", noise_std_dev_, 1e-4);
+  pnh.param<double>("alpha_vel", alpha_vel_, 0.1);
+
+  pos_noise_ = std::normal_distribution<double>(0.0, noise_std_dev_);
 
   for (auto it=start_position_map.begin(); it!=start_position_map.end(); it++)
   {
@@ -121,12 +125,21 @@ FakeJointDriver::~FakeJointDriver()
  */
 void FakeJointDriver::update(void)
 {
-  // only do loopback
-  //act_dis = cmd_dis;
+  // Backup previous pos
+  std::vector<double> prev_pos = act_dis;
 
+  // Add white noise to the current pos
   for (int i=0; i<cmd_dis.size(); i++)
   {
-    act_dis[i] = cmd_dis[i] + dist_(generator_);
+    act_dis[i] = cmd_dis[i] + pos_noise_(generator_);
   }
+
+  // Estimate current velocities via exponential weighted average
+  for (int i=0; i<cmd_dis.size(); i++)
+  {
+    act_vel[i] = (1-alpha_vel_)*act_vel[i] + alpha_vel_*(act_dis[i] - prev_pos[i]);
+  }
+
+
 }
 

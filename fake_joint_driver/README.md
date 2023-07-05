@@ -85,6 +85,14 @@ sliders to set the joint trajectory goals.
   </node>
   ```
 
+- `alpha_vel`
+
+  Exponential weighted averaging parameter for velocity estimation.
+
+- `noise_std_dev`
+
+  White noise added to the joint state positions.
+
 # Caution
 
 You can set target joints for joint_trajectory_controller in the

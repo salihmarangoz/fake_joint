@@ -29,7 +29,9 @@ private:
   std::vector<std::string> include_joints_;
   std::vector<std::string> exclude_joints_;
   std::default_random_engine generator_;
-  std::normal_distribution<double> dist_;
+  std::normal_distribution<double> pos_noise_;
+  double noise_std_dev_;
+  double alpha_vel_;
 
 public:
   FakeJointDriver(void);
