@@ -25,7 +25,7 @@ FakeJointDriver::FakeJointDriver(void)
   pnh.getParam("exclude_joints", exclude_joints_);
   pnh.getParam("start_position", start_position_map);
   pnh.param<double>("noise_std_dev", noise_std_dev_, 1e-4);
-  pnh.param<double>("alpha_vel", alpha_vel_, 0.1);
+  pnh.param<double>("alpha_vel", alpha_vel_, 0.9);
 
   pos_noise_ = std::normal_distribution<double>(0.0, noise_std_dev_);
 
@@ -87,6 +87,9 @@ FakeJointDriver::FakeJointDriver(void)
   act_vel.resize(joint_names_.size());
   act_eff.resize(joint_names_.size());
 
+  //prev_vel_.resize(joint_names_.size());
+  //prev_cmd_dis_.resize(joint_names_.size());
+
   // Set start position
   for (auto it=start_position_map.begin(); it!=start_position_map.end(); it++)
   {
@@ -123,23 +126,21 @@ FakeJointDriver::~FakeJointDriver()
 /**
  * @brief Update function to call all of the update function of motors
  */
-void FakeJointDriver::update(void)
-{
+void FakeJointDriver::update(ros::Duration dt)
+{ 
   // Backup previous pos
   std::vector<double> prev_pos = act_dis;
 
-  // Add white noise to the current pos
   for (int i=0; i<cmd_dis.size(); i++)
   {
+    // Add white noise to the current pos
     act_dis[i] = cmd_dis[i] + pos_noise_(generator_);
+
+    // Estimate current velocities via exponential weighted average
+    act_vel[i] = (1-alpha_vel_)*act_vel[i] + alpha_vel_*(act_dis[i] - prev_pos[i]) / dt.toSec(); 
   }
-
-  // Estimate current velocities via exponential weighted average
-  for (int i=0; i<cmd_dis.size(); i++)
-  {
-    act_vel[i] = (1-alpha_vel_)*act_vel[i] + alpha_vel_*(act_dis[i] - prev_pos[i]);
-  }
-
-
+  
+  //prev_vel_ = act_vel;
+  //prev_cmd_dis_ = cmd_dis;
 }
 

@@ -32,9 +32,10 @@ private:
   std::normal_distribution<double> pos_noise_;
   double noise_std_dev_;
   double alpha_vel_;
+  std::vector<double> prev_vel_, prev_cmd_dis_, prev_cmd_vel_, cmd_vel_;
 
 public:
   FakeJointDriver(void);
   ~FakeJointDriver();
-  void update(void);
+  void update(ros::Duration dt);
 };

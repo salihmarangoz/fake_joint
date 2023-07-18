@@ -34,8 +34,8 @@ int main(int argc, char **argv)
 
   while (ros::ok())
   {
-    robot.update();
-    cm.update(ros::Time::now(), rate.expectedCycleTime());
+    robot.update(rate.expectedCycleTime());  // TODO: use cycleTime instead?
+    cm.update(ros::Time::now(), rate.expectedCycleTime()); // TODO: use cycleTime instead?
     rate.sleep();
   }
   spinner.stop();
